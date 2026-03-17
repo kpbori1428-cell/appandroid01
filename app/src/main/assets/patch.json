@@ -1,0 +1,101 @@
+{
+  "backgroundColor": "#121212",
+  "children": [
+    {
+      "id": "header_image",
+      "path": "app.login.image",
+      "type": "IMAGE",
+      "aestheticProperties": {
+        "url": "https://picsum.photos/400/200",
+        "height": 150.0,
+        "paddingBottom": 24.0
+      }
+    },
+    {
+      "id": "title",
+      "path": "app.login.title",
+      "type": "TEXT",
+      "aestheticProperties": {
+        "text": "Bienvenido (Modo Oscuro)",
+        "fontSize": 32.0,
+        "textColor": "#FFFFFF",
+        "paddingBottom": 8.0
+      }
+    },
+    {
+      "id": "subtitle",
+      "path": "app.login.subtitle",
+      "type": "TEXT",
+      "aestheticProperties": {
+        "text": "El servidor ha aplicado un parche remoto (Oscuro).",
+        "fontSize": 14.0,
+        "textColor": "#BDBDBD",
+        "paddingBottom": 32.0
+      }
+    },
+    {
+      "id": "input_email",
+      "path": "app.login.input_email",
+      "type": "INPUT",
+      "aestheticProperties": {
+        "placeholder": "Correo electrónico",
+        "paddingBottom": 16.0
+      },
+      "logicDirectives": {
+        "keyboardType": "email"
+      }
+    },
+    {
+      "id": "input_password",
+      "path": "app.login.input_password",
+      "type": "INPUT",
+      "aestheticProperties": {
+        "placeholder": "Contraseña",
+        "paddingBottom": 32.0
+      },
+      "logicDirectives": {
+        "isPassword": true
+      }
+    },
+    {
+      "id": "btn_submit",
+      "path": "app.login.btn_submit",
+      "type": "ACTION_EMITTER",
+      "aestheticProperties": {
+        "label": "Ingresar",
+        "backgroundColor": "#FF4081",
+        "textColor": "#FFFFFF",
+        "paddingBottom": 24.0
+      },
+      "logicDirectives": {
+        "action": "login_request"
+      }
+    },
+    {
+      "id": "infinite_list",
+      "path": "app.login.list",
+      "type": "RECYCLER_VIEW",
+      "aestheticProperties": {},
+      "children": [
+        {
+           "id": "item_1",
+           "path": "app.login.list.item:ins[0]",
+           "type": "TEXT",
+           "aestheticProperties": { "text": "Item 1 (RecyclerView)", "textColor": "#FFFFFF", "paddingBottom": 8.0 }
+        },
+        {
+           "id": "item_2",
+           "path": "app.login.list.item:ins[1]",
+           "type": "TEXT",
+           "aestheticProperties": { "text": "Item 2 (RecyclerView)", "textColor": "#FFFFFF", "paddingBottom": 8.0 }
+        },
+        {
+           "id": "item_3",
+           "path": "app.login.list.item:ins[2]",
+           "type": "TEXT",
+           "aestheticProperties": { "text": "Item 3 (RecyclerView)", "textColor": "#FFFFFF", "paddingBottom": 8.0 }
+        }
+      ]
+    }
+  ]
+}
