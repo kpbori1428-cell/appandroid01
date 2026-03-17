@@ -74,13 +74,6 @@ class EngineViewModel : ViewModel() {
     private suspend fun fetchRemoteJson(urlString: String, context: Context): String {
         return withContext(Dispatchers.IO) {
             try {
-                // For demonstration, if it's the default Github mock URL, we fallback to our local test
-                // To actually test, update config.json with a real RAW Github URL.
-                if (urlString.contains("TuRepositorio")) {
-                    val stream = context.assets.open("ui_tree.json")
-                    return@withContext InputStreamReader(stream).readText()
-                }
-
                 val url = URL(urlString)
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"

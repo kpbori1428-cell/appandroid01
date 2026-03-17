@@ -1,4 +1,4 @@
 {
-  "remoteUrl": "https://raw.githubusercontent.com/TuUsuario/TuRepositorio/main/remote_app.json",
+  "remoteUrl": "http://10.0.2.2:8000/sample_app_weather.json",
   "fallbackUrl": "file:///android_asset/ui_tree.json"
 }
