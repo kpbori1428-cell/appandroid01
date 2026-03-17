@@ -1,0 +1,42 @@
+{
+  "id": "screen_weather",
+  "path": "app.weather",
+  "type": "CONTAINER",
+  "aestheticProperties": {
+    "padding": 24.0,
+    "backgroundColor": "#29B6F6"
+  },
+  "children": [
+    {
+      "id": "img_sun",
+      "path": "app.weather.image",
+      "type": "IMAGE",
+      "aestheticProperties": {
+        "url": "https://cdn-icons-png.flaticon.com/512/869/869869.png",
+        "height": 100.0,
+        "paddingBottom": 16.0
+      }
+    },
+    {
+      "id": "title",
+      "path": "app.weather.title",
+      "type": "TEXT",
+      "aestheticProperties": {
+        "text": "Ciudad de México",
+        "fontSize": 28.0,
+        "textColor": "#FFFFFF",
+        "paddingBottom": 4.0
+      }
+    },
+    {
+      "id": "temp",
+      "path": "app.weather.temp",
+      "type": "TEXT",
+      "aestheticProperties": {
+        "text": "24°C - Soleado",
+        "fontSize": 48.0,
+        "textColor": "#FFFFFF"
+      }
+    }
+  ]
+}

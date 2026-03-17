@@ -1,0 +1,57 @@
+{
+  "id": "screen_profile",
+  "path": "app.profile",
+  "type": "CONTAINER",
+  "aestheticProperties": {
+    "padding": 16.0,
+    "backgroundColor": "#FAFAFA"
+  },
+  "children": [
+    {
+      "id": "img_avatar",
+      "path": "app.profile.avatar",
+      "type": "IMAGE",
+      "aestheticProperties": {
+        "url": "https://i.pravatar.cc/300",
+        "height": 120.0,
+        "paddingBottom": 24.0
+      }
+    },
+    {
+      "id": "title_name",
+      "path": "app.profile.name",
+      "type": "TEXT",
+      "aestheticProperties": {
+        "text": "Juan Pérez",
+        "fontSize": 24.0,
+        "textColor": "#000000",
+        "paddingBottom": 8.0
+      }
+    },
+    {
+      "id": "input_bio",
+      "path": "app.profile.bio",
+      "type": "INPUT",
+      "aestheticProperties": {
+        "placeholder": "Actualiza tu biografía",
+        "paddingBottom": 24.0
+      },
+      "logicDirectives": {
+        "keyboardType": "text"
+      }
+    },
+    {
+      "id": "btn_save",
+      "path": "app.profile.save",
+      "type": "ACTION_EMITTER",
+      "aestheticProperties": {
+        "label": "Guardar Cambios",
+        "backgroundColor": "#4CAF50",
+        "textColor": "#FFFFFF"
+      },
+      "logicDirectives": {
+        "action": "save_profile"
+      }
+    }
+  ]
+}
