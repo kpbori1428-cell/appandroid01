@@ -33,6 +33,10 @@ class EngineViewModel : ViewModel() {
     var loadError by mutableStateOf<String?>(null)
         private set
 
+    // Este es el punto de anclaje estático en la App compilada.
+    // Esta es tu URL maestra pública y real en internet que acabamos de crear:
+    private val MASTER_CONFIG_URL = "https://kelokura00-creator.github.io/public/android_url.json"
+
     fun loadApplication(context: Context) {
         if (rootNode != null) return // Already loaded, survive rotation
 
@@ -41,74 +45,63 @@ class EngineViewModel : ViewModel() {
             loadError = null
 
             try {
-                // 1. Read config.json to get the Remote URL
-                val assetManager = context.assets
-                val configStream = assetManager.open("config.json")
-                val configReader = InputStreamReader(configStream)
-                val configRawJson = configReader.readText()
-                configReader.close()
+                // 1. Fetch Remote Config JSON (El archivo Maestro en Internet REAL)
+                val configRawJson = fetchRemoteJson(MASTER_CONFIG_URL)
 
                 val configMap = JsonParser.parsePatch(configRawJson)
-                val remoteUrl = configMap["remoteUrl"] as? String ?: ""
+                val remoteAppUrl = configMap["URL"] as? String ?: ""
 
-                // 2. Fetch Remote JSON App Config
-                val rawAppJson = fetchRemoteJson(remoteUrl, context)
+                if (remoteAppUrl.isEmpty()) {
+                    throw Exception("No se encontró el campo 'URL' en el config maestro.")
+                }
+
+                // 2. Fetch Remote JSON App Config (La App completa desde la URL inyectada en el config)
+                val rawAppJson = fetchRemoteJson(remoteAppUrl)
 
                 // 3. Parse and Mount App
                 val parsedRoot = JsonParser.parseUiTree(rawAppJson)
                 lifecycleManager.mount(parsedRoot)
                 rootNode = parsedRoot
 
-                // Simulating Server Push Update (Optional)
-                // simulateServerPatch(context)
-
             } catch (e: Exception) {
                 e.printStackTrace()
                 loadError = "Error descargando la App: ${e.message}"
+
+                // Si falla tu internet, cargar el diseño local de respaldo (Login App)
+                loadFallbackLocalApp(context)
             } finally {
                 isLoading = false
             }
         }
     }
 
-    private suspend fun fetchRemoteJson(urlString: String, context: Context): String {
+    private suspend fun fetchRemoteJson(urlString: String): String {
         return withContext(Dispatchers.IO) {
-            try {
-                val url = URL(urlString)
-                val connection = url.openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
-                connection.connectTimeout = 5000
-                connection.readTimeout = 5000
+            // Este es un GET real a la URL que le pasemos, sin simulaciones ni trampas.
+            val url = URL(urlString)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
 
-                val responseCode = connection.responseCode
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    connection.inputStream.bufferedReader().use { it.readText() }
-                } else {
-                    throw Exception("Servidor respondió con código: $responseCode")
-                }
-            } catch (e: Exception) {
-                // Fallback to local ui_tree.json if network fails
-                val stream = context.assets.open("ui_tree.json")
-                InputStreamReader(stream).readText()
+            val responseCode = connection.responseCode
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                connection.inputStream.bufferedReader().use { it.readText() }
+            } else {
+                throw Exception("Servidor respondió con código: $responseCode")
             }
         }
     }
 
-    private fun simulateServerPatch(context: Context) {
-        viewModelScope.launch {
-            delay(5000)
-            val assetManager = context.assets
-            val patchInputStream = assetManager.open("patch.json")
-            val patchReader = InputStreamReader(patchInputStream)
-            val patchRawJson = patchReader.readText()
-            patchReader.close()
-
-            val patchData = JsonParser.parsePatch(patchRawJson)
-            rootNode?.let { root ->
-                lifecycleManager.update(root, patchData) { newChildren ->
-                    JsonParser.parseNodes(newChildren)
-                }
-            }
+    private fun loadFallbackLocalApp(context: Context) {
+        try {
+            val stream = context.assets.open("ui_tree.json")
+            val rawJson = InputStreamReader(stream).readText()
+            val parsedRoot = JsonParser.parseUiTree(rawJson)
+            lifecycleManager.mount(parsedRoot)
+            rootNode = parsedRoot
+        } catch (e: Exception) {
+            // Error fatal si el archivo local tampoco existe
         }
     }
 
