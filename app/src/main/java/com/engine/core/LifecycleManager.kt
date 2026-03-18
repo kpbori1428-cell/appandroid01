@@ -35,6 +35,29 @@ class LifecycleManager(
         // Request async hardware permissions if LogicDirectives require it
         handleHardwarePermissions(node)
 
+        // Implement V4 Procedural Instance Generation
+        val finalChildren = mutableListOf<Node>()
+        for (child in node.children) {
+            val instMap = child.logicDirectives["instancias"] as? Map<String, Any>
+            val cantidad = (instMap?.get("cantidad") as? Double)?.toInt() ?: 0
+
+            if (cantidad > 0) {
+                // Procedural Loop
+                for (i in 0 until cantidad) {
+                    val clone = child.deepClone(newIdSuffix = i.toString())
+                    // Remove "instancias" to avoid infinite recursion on updates
+                    clone.logicDirectives.remove("instancias")
+                    finalChildren.add(clone)
+                }
+            } else {
+                finalChildren.add(child)
+            }
+        }
+
+        // Update children with expanded procedural instances
+        node.children = finalChildren
+        node.notifyStateChanged()
+
         // Recursively mount children
         for (child in node.children) {
             mount(child, currentDepth + 1)

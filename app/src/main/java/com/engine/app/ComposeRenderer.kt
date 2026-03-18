@@ -11,12 +11,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.viewinterop.AndroidView
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -24,12 +32,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
 import coil.compose.AsyncImage
 import com.engine.core.Node
 import com.engine.core.NodeTypes
+import com.engine.core.LogicEngine
 
 @Composable
-fun RenderNode(node: Node) {
+fun RenderNode(node: Node, onAction: (sourceNode: Node, trigger: String, params: Any?) -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
     // Escuchar el estado reactivo del nodo en lugar del mapa estático
     val aesthetics = node.reactiveAesthetics
 
@@ -63,7 +74,7 @@ fun RenderNode(node: Node) {
             Column(modifier = modifier) {
                 // Observamos los hijos reactivos para redibujar si se añaden/quitan nodos remotos
                 for (child in node.reactiveChildren) {
-                    RenderNode(node = child)
+                    RenderNode(node = child, onAction)
                 }
             }
         }
@@ -71,7 +82,7 @@ fun RenderNode(node: Node) {
             // Instanciación procedimental optimizada (Culling Lógico de Jetpack Compose)
             LazyColumn(modifier = modifier) {
                 items(node.reactiveChildren) { child ->
-                    RenderNode(node = child)
+                    RenderNode(node = child, onAction)
                 }
             }
         }
@@ -109,19 +120,60 @@ fun RenderNode(node: Node) {
                 modifier = modifier
             )
         }
+        NodeTypes.CHECKBOX -> {
+            val labelStr = aesthetics["label"] as? String ?: ""
+            var checked by remember { mutableStateOf(node.memoryCamera["value"] as? Boolean ?: false) }
+
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = {
+                        checked = it
+                        node.memoryCamera["value"] = it
+                    }
+                )
+                Text(text = labelStr)
+            }
+        }
+        NodeTypes.WEB_VIEW -> {
+            val urlStr = aesthetics["url"] as? String ?: "https://google.com"
+            val height = aesthetics["height"] as? Double
+
+            var webModifier = modifier
+            if (height != null) {
+                webModifier = webModifier.height(height.dp)
+            }
+
+            AndroidView(
+                factory = { context ->
+                    WebView(context).apply {
+                        settings.javaScriptEnabled = true
+                        webViewClient = WebViewClient()
+                        loadUrl(urlStr)
+                    }
+                },
+                update = { webView ->
+                    if (webView.url != urlStr) {
+                        webView.loadUrl(urlStr)
+                    }
+                },
+                modifier = webModifier
+            )
+        }
         NodeTypes.INPUT -> {
             val placeholder = aesthetics["placeholder"] as? String ?: ""
             val isPassword = node.logicDirectives["isPassword"] as? Boolean == true
+            val bindKey = node.logicDirectives["bindKey"] as? String ?: "value"
 
             // Memory Camera Simulation via Local State
-            var text by remember { mutableStateOf(node.memoryCamera["value"] as? String ?: "") }
+            var text by remember { mutableStateOf(node.memoryCamera[bindKey] as? String ?: "") }
 
             OutlinedTextField(
                 value = text,
                 onValueChange = {
                     text = it
-                    // Save to Engine Memory Camera
-                    node.memoryCamera["value"] = it
+                    // Save to Engine Memory Camera using a specific key if requested
+                    node.memoryCamera[bindKey] = it
                 },
                 label = { Text(placeholder) },
                 visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
@@ -141,9 +193,9 @@ fun RenderNode(node: Node) {
 
             Button(
                 onClick = {
-                    // Logic Directive Action Emitter simulation
-                    println("Boton Presionado: " + node.logicDirectives["action"])
-                    println("Valores en memoria: ${node.memoryCamera}") // Esto imprimiría en logcat
+                    // Ejecuta las directivas V4 en Kotlin Nativo
+                    onAction(node, "click", node.logicDirectives["action"])
+                    println("Valores locales en memoria del botón: ${node.memoryCamera}")
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
                 modifier = modifier

@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
                         engineViewModel.loadApplication(this)
                     } else {
                         // It survived rotation! Just render it.
-                        RenderNode(node = rootNode)
+                        RenderNode(node = rootNode, onAction = engineViewModel::onNodeAction)
                     }
                 }
             }

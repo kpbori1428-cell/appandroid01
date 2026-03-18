@@ -19,6 +19,29 @@ data class Node(
     @Transient var reactiveDirectives = mutableStateMapOf<String, Any>()
     @Transient var reactiveChildren = mutableStateListOf<Node>()
 
+    // Internal node states for complex V4 features (animations, hover, interactions)
+    @Transient var internalState = mutableStateMapOf<String, Any>()
+
+    // Generador de Copias Profundas de Nodos (Instancias Procedimentales V4)
+    fun deepClone(newIdSuffix: String? = null): Node {
+        val newId = if (newIdSuffix != null) "${this.id}_$newIdSuffix" else this.id
+        val newPath = if (newIdSuffix != null) "${this.path}[$newIdSuffix]" else this.path
+
+        val cloned = Node(
+            id = newId,
+            path = newPath,
+            type = this.type,
+            instanceRule = this.instanceRule,
+            aestheticProperties = HashMap(this.aestheticProperties),
+            logicDirectives = HashMap(this.logicDirectives),
+            children = this.children.map { it.deepClone(newIdSuffix) },
+            memoryCamera = HashMap(this.memoryCamera),
+            baseConstraints = HashMap(this.baseConstraints)
+        )
+        cloned.initDefaults()
+        return cloned
+    }
+
     // Garantiza que tras la deserialización de GSON, los objetos no queden nulos si no venían en el JSON
     // Y sincroniza las colecciones estáticas con las colecciones reactivas de Compose
     fun initDefaults() {

@@ -1,0 +1,167 @@
+{
+  "id": "screen_chat_wsp",
+  "path": "app.chat",
+  "type": "CONTAINER",
+  "aestheticProperties": {
+    "backgroundColor": "#E5DDD5",
+    "padding": 0.0
+  },
+  "children": [
+    {
+      "id": "chat_header",
+      "path": "app.chat.header",
+      "type": "CONTAINER",
+      "aestheticProperties": {
+        "backgroundColor": "#075E54",
+        "padding": 12.0
+      },
+      "children": [
+        {
+          "id": "header_profile_img",
+          "path": "app.chat.header.img",
+          "type": "IMAGE",
+          "aestheticProperties": {
+            "url": "https://i.pravatar.cc/100?img=33",
+            "height": 40.0
+          }
+        },
+        {
+          "id": "header_name",
+          "path": "app.chat.header.name",
+          "type": "TEXT",
+          "aestheticProperties": {
+            "text": "Juan Pérez (En línea)",
+            "textColor": "#FFFFFF",
+            "fontSize": 18.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "chat_history",
+      "path": "app.chat.history",
+      "type": "RECYCLER_VIEW",
+      "aestheticProperties": {
+        "padding": 16.0
+      },
+      "children": [
+        {
+          "id": "msg_received",
+          "path": "app.chat.history.msg1",
+          "type": "CONTAINER",
+          "aestheticProperties": {
+            "backgroundColor": "#FFFFFF",
+            "padding": 12.0,
+            "paddingBottom": 16.0
+          },
+          "children": [
+            {
+              "id": "text_received",
+              "path": "app.chat.history.msg1.text",
+              "type": "TEXT",
+              "aestheticProperties": {
+                "text": "Hola! ¿Ya viste el nuevo motor V5? Es increíble, estoy armando 10,000 apps.",
+                "textColor": "#000000",
+                "fontSize": 16.0
+              }
+            }
+          ]
+        },
+        {
+          "id": "msg_sent",
+          "path": "app.chat.history.msg2",
+          "type": "CONTAINER",
+          "aestheticProperties": {
+            "backgroundColor": "#DCF8C6",
+            "padding": 12.0,
+            "paddingBottom": 16.0
+          },
+          "children": [
+            {
+              "id": "text_sent",
+              "path": "app.chat.history.msg2.text",
+              "type": "TEXT",
+              "aestheticProperties": {
+                "text": "Sí, lo acabo de ver. Lo mejor es que no tuvimos que programar Kotlin para este chat.",
+                "textColor": "#000000",
+                "fontSize": 16.0
+              }
+            },
+            {
+              "id": "status_sent",
+              "path": "app.chat.history.msg2.status",
+              "type": "TEXT",
+              "aestheticProperties": {
+                "text": "10:45 AM ✓✓",
+                "textColor": "#4B5563",
+                "fontSize": 12.0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chat_input_area",
+      "path": "app.chat.input_area",
+      "type": "CONTAINER",
+      "aestheticProperties": {
+        "backgroundColor": "#FFFFFF",
+        "padding": 8.0
+      },
+      "children": [
+        {
+          "id": "input_message",
+          "path": "app.chat.input_area.text",
+          "type": "INPUT",
+          "aestheticProperties": {
+            "placeholder": "Escribe un mensaje...",
+            "paddingBottom": 12.0
+          },
+          "logicDirectives": {
+            "bindKey": "user_message"
+          }
+        },
+        {
+          "id": "btn_send",
+          "path": "app.chat.input_area.send",
+          "type": "ACTION_EMITTER",
+          "aestheticProperties": {
+            "label": "Enviar ➤",
+            "backgroundColor": "#128C7E",
+            "textColor": "#FFFFFF"
+          },
+          "logicDirectives": {
+            "onEvent": [
+              {
+                "event": "click",
+                "operation": "HTTP_POST",
+                "url": "https://api.tu-servidor.com/chat/enviar",
+                "body": [
+                  "user_message"
+                ],
+                "onSuccess": [
+                  {
+                    "disparador": "success",
+                    "objetivo": "app.chat.input_area.send",
+                    "estilos": {
+                      "label": "Enviado ✓",
+                      "backgroundColor": "#25D366"
+                    }
+                  },
+                  {
+                    "disparador": "success",
+                    "objetivo": "app.chat.input_area.text",
+                    "estilos": {
+                      "placeholder": "Mensaje enviado..."
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
