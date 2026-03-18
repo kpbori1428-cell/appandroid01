@@ -1,8 +1,12 @@
 package com.engine.app
 
 import android.os.Bundle
+import android.Manifest
+import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -34,10 +38,48 @@ class MainActivity : ComponentActivity() {
                     val isLoading = engineViewModel.isLoading
                     val loadError = engineViewModel.loadError
 
+                    // Preparar los permisos base que la Super App podría necesitar
+                    val permissionsToRequest = mutableListOf(
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.RECORD_AUDIO,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+
+                    // Bluetooth Permissions (API 31+)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        permissionsToRequest.add(Manifest.permission.BLUETOOTH_CONNECT)
+                    } else {
+                        permissionsToRequest.add(Manifest.permission.BLUETOOTH)
+                    }
+
+                    // Media/Storage Permissions (API 33+)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES)
+                        permissionsToRequest.add(Manifest.permission.READ_MEDIA_VIDEO)
+                    } else {
+                        permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    }
+
+                    // Lanzador nativo de Android para solicitar permisos
+                    val permissionLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestMultiplePermissions()
+                    ) { permissions ->
+                        // Aquí podríamos bloquear la app si rechazan algo vital,
+                        // pero la filosofía del Motor JSON es que todo es dinámico,
+                        // así que dejamos que la app cargue y si el JSON luego usa la cámara y no hay permiso, fallará en ese nodo.
+
+                        // Una vez respondido el popup, cargamos el Motor si no estaba cargado
+                        if (rootNode == null) {
+                            engineViewModel.loadApplication(this@MainActivity)
+                        }
+                    }
+
                     LaunchedEffect(Unit) {
                         if (rootNode == null) {
-                            // Load immediately the first time safely
-                            engineViewModel.loadApplication(this@MainActivity)
+                            // Primero lanzamos la solicitud masiva de permisos al abrir la App
+                            permissionLauncher.launch(permissionsToRequest.toTypedArray())
                         }
                     }
 
